@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Kód Generátor</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        #qrcode {
+            margin-top: 20px;
+        }
+        .input-group-text {
+            cursor: pointer;
+        }
+        .btn-download {
+            display: none;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .btn-group .btn {
+            flex: 1;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center" id="title">QR-kód generátor</h1>
+        <form id="qrForm">
+            <div class="form-group">
+                <label for="link" id="link-label">Link:</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="link" placeholder="Add meg a linket">
+                    <div class="input-group-append">
+                        <span class="input-group-text" id="clear-link">X</span>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary" id="generate-btn">Generálás</button>
+                <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#settingsModal" id="settings-btn">Beállítások</button>
+                <button id="download" class="btn btn-success btn-download">Letöltés</button>
+            </div>
+        </form>
+        <div id="qrcode" class="text-center"></div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">QR-kód méret beállítások</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="qrSize" id="size-label">QR-kód mérete:</label>
+                        <select class="form-control" id="qrSize">
+                            <option value="128">128 px</option>
+                            <option value="256">256 px</option>
+                            <option value="512">512 px</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Bezárás</button>
+                    <button type="button" class="btn btn-primary" id="saveSettings">Mentés</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script>
+        let qrCodeSize = 128;
+        let currentLink = '';
+
+        function generateQRCode(link, size) {
+            $('#qrcode').html('');
+            let qrcode = new QRCode(document.getElementById('qrcode'), {
+                text: link,
+                width: size,
+                height: size
+            });
+        }
+
+        function downloadQRCode() {
+            let canvas = document.querySelector('#qrcode canvas');
+            if (canvas) {
+                let link = document.createElement('a');
+                link.href = canvas.toDataURL('image/jpeg');
+                link.download = 'qr.jpg';
+                link.click();
+            } else {
+                alert('QR kód nem található!');
+            }
+        }
+
+        function getBrowserLanguage() {
+            return navigator.language || navigator.userLanguage;
+        }
+
+        function setLanguageTexts(language) {
+            const texts = {
+			hu: {
+				title: 'QR-kód generátor',
+				linkLabel: 'Link:',
+				linkPlaceholder: 'Add meg a linket',
+				generateBtn: 'Generálás',
+				clearBtn: 'X',
+				downloadBtn: 'Letöltés',
+				sizeLabel: 'QR Kód Mérete:',
+				settingsBtn: 'Beállítások',
+				alertMsg: 'Kérlek, adj meg egy linket!',
+				settingsModalTitle: 'QR-kód Méret Beállítások',
+				closeSettings: 'Bezárás',
+				saveSettings: 'Mentés'
+			},
+			en: {
+				title: 'QR-code generator',
+				linkLabel: 'Link:',
+				linkPlaceholder: 'Enter the link',
+				generateBtn: 'Generate',
+				clearBtn: 'X',
+				downloadBtn: 'Download',
+				sizeLabel: 'QR-Code Size:',
+				settingsBtn: 'Settings',
+				alertMsg: 'Please enter a link!',
+				settingsModalTitle: 'QR-code size settings',
+				closeSettings: 'Close',
+				saveSettings: 'Save'
+			},
+			fr: {
+				title: 'Générateur de code QR',
+				linkLabel: 'Lien :',
+				linkPlaceholder: 'Entrez le lien',
+				generateBtn: 'Générer',
+				clearBtn: 'X',
+				downloadBtn: 'Télécharger',
+				sizeLabel: 'Taille du code QR :',
+				settingsBtn: 'Paramètres',
+				alertMsg: 'Veuillez entrer un lien !',
+				settingsModalTitle: 'Réglages de la taille du code QR',
+				closeSettings: 'Fermer',
+				saveSettings: 'Enregistrer'
+			},
+			de: {
+				title: 'QR-Code Generator',
+				linkLabel: 'Link:',
+				linkPlaceholder: 'Link eingeben',
+				generateBtn: 'Generieren',
+				clearBtn: 'X',
+				downloadBtn: 'Herunterladen',
+				sizeLabel: 'QR-Code-Größe:',
+				settingsBtn: 'Einstellungen',
+				alertMsg: 'Bitte geben Sie einen Link ein!',
+				settingsModalTitle: 'QR-Code-Größeneinstellungen',
+				closeSettings: 'Schließen',
+				saveSettings: 'Speichern'
+			},
+			es: {
+				title: 'Generador de Códigos QR',
+				linkLabel: 'Enlace:',
+				linkPlaceholder: 'Ingrese el enlace',
+				generateBtn: 'Generar',
+				clearBtn: 'X',
+				downloadBtn: 'Descargar',
+				sizeLabel: 'Tamaño del Código QR:',
+				settingsBtn: 'Ajustes',
+				alertMsg: '¡Por favor ingrese un enlace!',
+				settingsModalTitle: 'Ajustes del Tamaño del Código QR',
+				closeSettings: 'Cerrar',
+				saveSettings: 'Guardar'
+			},
+			it: {
+				title: 'Generatore di Codici QR',
+				linkLabel: 'Link:',
+				linkPlaceholder: 'Inserisci il link',
+				generateBtn: 'Genera',
+				clearBtn: 'X',
+				downloadBtn: 'Scarica',
+				sizeLabel: 'Dimensione del Codice QR:',
+				settingsBtn: 'Impostazioni',
+				alertMsg: 'Per favore inserisci un link!',
+				settingsModalTitle: 'Impostazioni della Dimensione del Codice QR',
+				closeSettings: 'Chiudi',
+				saveSettings: 'Salva'
+			},
+			pt: {
+				title: 'Gerador de Códigos QR',
+				linkLabel: 'Link:',
+				linkPlaceholder: 'Insira o link',
+				generateBtn: 'Gerar',
+				clearBtn: 'X',
+				downloadBtn: 'Baixar',
+				sizeLabel: 'Tamanho do Código QR:',
+				settingsBtn: 'Configurações',
+				alertMsg: 'Por favor, insira um link!',
+				settingsModalTitle: 'Configurações do Tamanho do Código QR',
+				closeSettings: 'Fechar',
+				saveSettings: 'Salvar'
+			},
+			nl: {
+				title: 'QR-code Generator',
+				linkLabel: 'Link:',
+				linkPlaceholder: 'Voer de link in',
+				generateBtn: 'Genereren',
+				clearBtn: 'X',
+				downloadBtn: 'Downloaden',
+				sizeLabel: 'Grootte van de QR-code:',
+				settingsBtn: 'Instellingen',
+				alertMsg: 'Voer alstublieft een link in!',
+				settingsModalTitle: 'Instellingen voor de grootte van de QR-code',
+				closeSettings: 'Sluiten',
+				saveSettings: 'Opslaan'
+			},
+			sv: {
+				title: 'QR-kodgenerator',
+				linkLabel: 'Länk:',
+				linkPlaceholder: 'Ange länken',
+				generateBtn: 'Generera',
+				clearBtn: 'X',
+				downloadBtn: 'Ladda ner',
+				sizeLabel: 'QR-kodstorlek:',
+				settingsBtn: 'Inställningar',
+				alertMsg: 'Var god ange en länk!',
+				settingsModalTitle: 'Inställningar för QR-kodstorlek',
+				closeSettings: 'Stäng',
+				saveSettings: 'Spara'
+			}
+                // Add more languages here
+            };
+
+            const lang = texts[language] ? language : 'en';
+
+            $('#title').text(texts[lang].title);
+            $('#link-label').text(texts[lang].linkLabel);
+            $('#link').attr('placeholder', texts[lang].linkPlaceholder);
+            $('#generate-btn').text(texts[lang].generateBtn);
+            $('#clear-link').text(texts[lang].clearBtn);
+            $('#download').text(texts[lang].downloadBtn);
+            $('#size-label').text(texts[lang].sizeLabel);
+            $('#settings-btn').text(texts[lang].settingsBtn);
+            $('#settingsModalLabel').text(texts[lang].settingsModalTitle);
+            $('#settingsModal .btn-secondary').text(texts[lang].closeSettings);
+            $('#saveSettings').text(texts[lang].saveSettings);
+
+            return texts[lang].alertMsg;
+        }
+
+        $(document).ready(function() {
+            const userLang = getBrowserLanguage().slice(0, 2);
+            const alertMsg = setLanguageTexts(userLang);
+
+            $('#qrForm').submit(function(event) {
+                event.preventDefault();
+                let link = $('#link').val();
+                if (link) {
+                    currentLink = link;
+                    generateQRCode(link, qrCodeSize);
+                    setTimeout(function() {
+                        $('#download').show();
+                    }, 300); // Kis késleltetés a QR kód generálása miatt
+                } else {
+                    alert(alertMsg);
+                }
+            });
+
+            $('#clear-link').click(function() {
+                $('#link').val('');
+                $('#qrcode').html('');
+                $('#download').hide();
+            });
+
+            $('#saveSettings').click(function() {
+                qrCodeSize = parseInt($('#qrSize').val());
+                $('#settingsModal').modal('hide');
+                if (currentLink) {
+                    generateQRCode(currentLink, qrCodeSize);
+                }
+            });
+
+            $('#download').click(function() {
+                downloadQRCode();
+            });
+        });
+    </script>
+</body>
+</html>
